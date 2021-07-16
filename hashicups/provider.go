@@ -3,7 +3,7 @@ package hashicups
 import (
 	"context"
 
-	"github.com/hashicorp-demoapp/hashicups-client-go"
+	hc "github.com/hashicorp-demoapp/hashicups-client-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -27,6 +27,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hashicups_coffees": dataSourceCoffees(),
+			"hashicups_order":   dataSourceOrder(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -40,7 +41,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	var diags diag.Diagnostics
 
 	if (username != "") && (password != "") {
-		c, err := hashicups.NewClient(nil, &username, &password)
+		c, err := hc.NewClient(nil, &username, &password)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
@@ -48,7 +49,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return c, diags
 	}
 
-	c, err := hashicups.NewClient(nil, nil, nil)
+	c, err := hc.NewClient(nil, nil, nil)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
