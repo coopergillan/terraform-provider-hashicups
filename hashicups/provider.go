@@ -24,7 +24,9 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("HASHICUPS_PASSWORD", nil),
 			},
 		},
-		ResourcesMap: map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"hashicups_order": resourceOrder(),
+		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hashicups_coffees": dataSourceCoffees(),
 			"hashicups_order":   dataSourceOrder(),
@@ -43,7 +45,11 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	if (username != "") && (password != "") {
 		c, err := hc.NewClient(nil, &username, &password)
 		if err != nil {
-			return nil, diag.FromErr(err)
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Unable to create HashiCups client",
+				Detail:   "Unable to auth user for authenticated Hashicups client",
+			})
 		}
 
 		return c, diags
@@ -51,7 +57,11 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 	c, err := hc.NewClient(nil, nil, nil)
 	if err != nil {
-		return nil, diag.FromErr(err)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  "Unable to create HashiCups client",
+			Detail:   "Unable to auth user for authenticated Hashicups client",
+		})
 	}
 
 	return c, diags
